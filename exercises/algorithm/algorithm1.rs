@@ -2,13 +2,12 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
 use std::vec::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 struct Node<T> {
     val: T,
     next: Option<NonNull<Node<T>>>,
@@ -22,20 +21,20 @@ impl<T> Node<T> {
         }
     }
 }
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 struct LinkedList<T> {
     length: u32,
     start: Option<NonNull<Node<T>>>,
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: PartialOrd + Clone + std::cmp::PartialOrd> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T : PartialOrd + Clone + std::cmp::PartialOrd> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -72,11 +71,44 @@ impl<T> LinkedList<T> {
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
 		//TODO
-		Self {
+		let mut c = Self {
             length: 0,
             start: None,
             end: None,
+        };
+
+        let mut anode = list_a.start;
+        let mut bnode = list_b.start;
+
+        while anode.is_some() || bnode.is_some() {
+            let aval = anode.map(|ptr| unsafe {&(*ptr.as_ptr()).val});
+            let bval = bnode.map(|ptr| unsafe {&(*ptr.as_ptr()).val});
+
+            match (aval, bval) {
+                (Some(l), Some(r)) => {
+                    if l <= r {
+                        c.add(l.clone());
+                        anode = unsafe { (*anode.unwrap().as_ptr()).next };
+                    } else {
+                        c.add(r.clone());
+                        bnode = unsafe { (*bnode.unwrap().as_ptr()).next };
+                    }
+                },
+                (Some(l), None) => {
+                    c.add(l.clone());
+                    anode = unsafe { (*anode.unwrap().as_ptr()).next };
+                },
+                (None, Some(r)) => {
+                    c.add(r.clone());
+                    bnode = unsafe { (*bnode.unwrap().as_ptr()).next };
+                },
+                _ => {
+                    
+                }
+            }
         }
+
+        c
 	}
 }
 
