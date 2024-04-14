@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -38,7 +37,35 @@ where
 
     pub fn add(&mut self, value: T) {
         //TODO
+		self.items.push(value);
+		self.count += 1;
+		let idx = self.count;
+		self.adj(idx);
     }
+
+	fn adj(&mut self, mut idx: usize) { 
+		while idx > 1 {
+			let pidx = self.parent_idx(idx);
+			if (self.comparator)(&self.items[idx], &self.items[pidx]) {
+				self.items.swap(idx, pidx);
+				idx = pidx;
+			} else {
+				break;
+			}
+		}
+	}
+
+	fn adjd(&mut self, mut idx: usize) {
+		while self.children_present(idx) {
+			let minidx = self.smallest_child_idx(idx);
+			if ((self.comparator)(&self.items[minidx], &self.items[idx])) {
+				self.items.swap(minidx, idx);
+				idx = minidx;
+			} else {
+				break;
+			}
+		}
+	}
 
     fn parent_idx(&self, idx: usize) -> usize {
         idx / 2
@@ -58,7 +85,15 @@ where
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-		0
+		let l = self.left_child_idx(idx);
+		let r = self.right_child_idx(idx);
+		if r > self.count {
+			l
+		}  else if (self.comparator)(&self.items[l], &self.items[r]) {
+			l
+		} else {
+			r
+		}
     }
 }
 
@@ -85,7 +120,14 @@ where
 
     fn next(&mut self) -> Option<T> {
         //TODO
-		None
+		if self.count == 0 {
+			return None;
+		}
+
+		let res = self.items.swap_remove(1);
+		self.count -= 1;
+		self.adjd(1);
+		Some(res)
     }
 }
 
